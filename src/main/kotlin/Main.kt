@@ -1,19 +1,27 @@
 import java.lang.RuntimeException
 import java.nio.file.Path
 
-class PrintFlagsFinalGenerator {
-    fun generate(path: String): Set<String> {
-        val java = Path.of(path, "bin", "java").toString()
-        val cmd = listOf(java, "-XX:+PrintFlagsFinal", "-version")
-        val process = ProcessBuilder().command(cmd).start()
-        val lines = process.inputStream.reader().use { it.readLines() }
-        val options = lines.slice(1..lines.lastIndex).map { it.split(' ').filter { s -> s.isNotEmpty() }[1] }.toSet()
-        val status = process.waitFor()
-        if (status != 0) {
-            throw RuntimeException("starting java failed")
-        }
-        return options
+fun generate(path: String): Set<String> {
+    val java = Path.of(path, "bin", "java").toString()
+    val cmd = listOf(java, "-XX:+PrintFlagsFinal", "-version")
+    val process = ProcessBuilder().command(cmd).start()
+    val lines = process.inputStream.reader().use { it.readLines() }
+    val options = lines.slice(1..lines.lastIndex).map { it.split(' ').filter { s -> s.isNotEmpty() }[1] }.toSet()
+    val status = process.waitFor()
+    if (status != 0) {
+        throw RuntimeException("starting java failed")
     }
+    return options
+}
+
+fun getNewOptions(old: Set<String>, new: Set<String>): List<String> {
+    val ret = mutableListOf<String>()
+    for (option in new) {
+        if (option !in old) {
+            ret.add(option)
+        }
+    }
+    return ret
 }
 
 fun main(args: Array<String>) {
@@ -22,8 +30,7 @@ fun main(args: Array<String>) {
     }
     val pathToJdkOld = args[0]
     val pathToJdkNew = args[1]
-    val pffGenerator = PrintFlagsFinalGenerator()
-    val jdkOldOptions = pffGenerator.generate(pathToJdkOld)
-    val jdkNewOptions = pffGenerator.generate(pathToJdkNew)
-    println(jdkOldOptions.joinToString("\n"))
+    val newOptions = getNewOptions(generate(pathToJdkOld), generate(pathToJdkNew))
+    println("New options number: ${newOptions.size}")
+    println(newOptions.joinToString("\n"))
 }
