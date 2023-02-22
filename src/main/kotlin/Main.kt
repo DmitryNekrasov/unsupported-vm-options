@@ -26,6 +26,14 @@ fun getNewOptions(old: Set<String>, new: Set<String>): List<String> {
     return ret
 }
 
+fun List<String>.generateNeedToAdd(): List<String> {
+    return this.map { "  {\"$it\", NULL, 0}," }
+}
+
+fun generateCurrentUnsupportedOptionsList(argumentsCpp: String): List<String> {
+    return argumentsCpp.substringAfter("static optionAttr_t UnsupportedOracleOptions[] = {").substringBefore("};").split("\n")
+}
+
 fun main(args: Array<String>) {
     if (args.size < 2) {
         throw IllegalArgumentException("Not enough arguments for the application to work. You need to pass 2 paths to the JDK.")
@@ -50,11 +58,9 @@ fun main(args: Array<String>) {
         return this.filter { !argumentsCpp.contains(it) }
     }
 
-    fun List<String>.generateNeedToAdd(): List<String> {
-        return this.map { "  {\"$it\", NULL, 0}," }
-    }
-
-    val options = getNewOptions(generate(pathToJdkOld), generate(pathToJdkNew)).filterByGlobalsHpp().filterByArgumentsCpp().generateNeedToAdd()
-    println("Options number: ${options.size}")
-    println(options.joinToString("\n"))
+    val needToAdd = getNewOptions(generate(pathToJdkOld), generate(pathToJdkNew)).filterByGlobalsHpp().filterByArgumentsCpp().generateNeedToAdd()
+    println("Options number: ${needToAdd.size}")
+    println(needToAdd.joinToString("\n"))
+    val input = generateCurrentUnsupportedOptionsList(argumentsCpp)
+    println(input)
 }
