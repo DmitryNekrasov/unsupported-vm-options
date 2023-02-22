@@ -34,6 +34,29 @@ fun generateCurrentUnsupportedOptionsList(argumentsCpp: String): List<String> {
     return argumentsCpp.substringAfter("static optionAttr_t UnsupportedOracleOptions[] = {").substringBefore("};").split("\n")
 }
 
+fun merge(input: List<String>, needToAdd: List<String>): List<String> {
+    var p1 = 0
+    var p2 = 0
+    val result = mutableListOf<String>()
+    while (p1 < input.size) {
+        val s1 = input[p1]
+        if (!s1.startsWith("  {") || p2 >= needToAdd.size) {
+            result.add(s1)
+            p1++
+            continue
+        }
+        val s2 = needToAdd[p2]
+        if (s1 < s2) {
+            result.add(s1)
+            p1++
+        } else {
+            result.add(s2)
+            p2++
+        }
+    }
+    return result
+}
+
 fun main(args: Array<String>) {
     if (args.size < 2) {
         throw IllegalArgumentException("Not enough arguments for the application to work. You need to pass 2 paths to the JDK.")
@@ -63,4 +86,6 @@ fun main(args: Array<String>) {
     println(needToAdd.joinToString("\n"))
     val input = generateCurrentUnsupportedOptionsList(argumentsCpp)
     println(input)
+    val afterMerge = merge(input, needToAdd)
+    println(afterMerge)
 }
