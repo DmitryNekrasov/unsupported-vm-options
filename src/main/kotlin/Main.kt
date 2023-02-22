@@ -22,13 +22,22 @@ fun getNewOptions(old: Set<String>, new: Set<String>): List<String> {
     return ret
 }
 
+fun filterByGlobalsHpp(pathToHotspot: String, options: List<String>): List<String> {
+    return emptyList()
+}
+
 fun main(args: Array<String>) {
     if (args.size < 2) {
         throw IllegalArgumentException("Not enough arguments for the application to work. You need to pass 2 paths to the JDK.")
     }
+    if (args.size < 3) {
+        throw IllegalArgumentException("Not enough arguments for the application to work. You need to pass a path to the hotspot folder.")
+    }
     val pathToJdkOld = args[0]
     val pathToJdkNew = args[1]
+    val pathToHotspot = args[2]
     val newOptions = getNewOptions(generate(pathToJdkOld), generate(pathToJdkNew))
     println("New options number: ${newOptions.size}")
     println(newOptions.joinToString("\n"))
+    val filterByGlobalsHppOptions = filterByGlobalsHpp(pathToHotspot, newOptions)
 }
