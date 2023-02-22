@@ -43,13 +43,18 @@ fun main(args: Array<String>) {
         return this.filter { !globalsHpp.contains(it) }
     }
 
+    val pathToArgumentsCpp = Path.of(pathToHotspot, "src", "share", "runtime", "arguments.cpp").toString()
+    val argumentsCpp = FileReader(File(pathToArgumentsCpp)).readText()
+
     fun List<String>.filterByArgumentsCpp(): List<String> {
-        val pathToArgumentsCpp = Path.of(pathToHotspot, "src", "share", "runtime", "arguments.cpp").toString()
-        val argumentsCpp = FileReader(File(pathToArgumentsCpp)).readText()
         return this.filter { !argumentsCpp.contains(it) }
     }
 
-    val options = getNewOptions(generate(pathToJdkOld), generate(pathToJdkNew)).filterByGlobalsHpp().filterByArgumentsCpp()
+    fun List<String>.generateNeedToAdd(): List<String> {
+        return this.map { "  {\"$it\", NULL, 0}," }
+    }
+
+    val options = getNewOptions(generate(pathToJdkOld), generate(pathToJdkNew)).filterByGlobalsHpp().filterByArgumentsCpp().generateNeedToAdd()
     println("Options number: ${options.size}")
     println(options.joinToString("\n"))
 }
