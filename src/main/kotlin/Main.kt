@@ -1,3 +1,7 @@
+import java.io.File
+import java.io.FileReader
+import java.io.InputStream
+import java.io.InputStreamReader
 import java.lang.RuntimeException
 import java.nio.file.Path
 
@@ -23,7 +27,9 @@ fun getNewOptions(old: Set<String>, new: Set<String>): List<String> {
 }
 
 fun filterByGlobalsHpp(pathToHotspot: String, options: List<String>): List<String> {
-    return emptyList()
+    val pathToGlobalsHpp = Path.of(pathToHotspot, "src", "share", "runtime", "globals.hpp").toString()
+    val globalsHpp = FileReader(File(pathToGlobalsHpp)).readText()
+    return options.filter { !globalsHpp.contains(it) }
 }
 
 fun main(args: Array<String>) {
@@ -36,8 +42,7 @@ fun main(args: Array<String>) {
     val pathToJdkOld = args[0]
     val pathToJdkNew = args[1]
     val pathToHotspot = args[2]
-    val newOptions = getNewOptions(generate(pathToJdkOld), generate(pathToJdkNew))
-    println("New options number: ${newOptions.size}")
-    println(newOptions.joinToString("\n"))
-    val filterByGlobalsHppOptions = filterByGlobalsHpp(pathToHotspot, newOptions)
+    val needToAddOptions = filterByGlobalsHpp(pathToHotspot, getNewOptions(generate(pathToJdkOld), generate(pathToJdkNew)))
+    println("Options number: ${needToAddOptions.size}")
+    println(needToAddOptions.joinToString("\n"))
 }
