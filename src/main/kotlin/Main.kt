@@ -1,5 +1,7 @@
 import java.io.File
+import java.io.FileOutputStream
 import java.io.FileReader
+import java.io.FileWriter
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.lang.RuntimeException
@@ -86,5 +88,6 @@ fun main(args: Array<String>) {
     val needToAdd = getNewOptions(generate(pathToJdkOld), generate(pathToJdkNew)).filterByGlobalsHpp().filterByArgumentsCpp().generateNeedToAdd()
     val afterMerge = merge(input, needToAdd).joinToString("\n")
     val newArgumentsCpp = argumentsCpp.replace(toReplace, afterMerge)
-    println(newArgumentsCpp)
+    File(pathToArgumentsCpp).outputStream().write(newArgumentsCpp.toByteArray())
+    println("Options added successfully")
 }
