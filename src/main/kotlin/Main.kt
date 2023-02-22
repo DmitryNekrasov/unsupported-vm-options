@@ -30,8 +30,8 @@ fun List<String>.generateNeedToAdd(): List<String> {
     return this.map { "  {\"$it\", NULL, 0}," }
 }
 
-fun generateCurrentUnsupportedOptionsList(argumentsCpp: String): List<String> {
-    return argumentsCpp.substringAfter("static optionAttr_t UnsupportedOracleOptions[] = {").substringBefore("};").split("\n")
+fun generateCurrentUnsupportedOptionsList(toReplace: String): List<String> {
+    return toReplace.split("\n")
 }
 
 fun merge(input: List<String>, needToAdd: List<String>): List<String> {
@@ -81,11 +81,10 @@ fun main(args: Array<String>) {
         return this.filter { !argumentsCpp.contains(it) }
     }
 
+    val toReplace = argumentsCpp.substringAfter("static optionAttr_t UnsupportedOracleOptions[] = {").substringBefore("};")
+    val input = generateCurrentUnsupportedOptionsList(toReplace)
     val needToAdd = getNewOptions(generate(pathToJdkOld), generate(pathToJdkNew)).filterByGlobalsHpp().filterByArgumentsCpp().generateNeedToAdd()
-    println("Options number: ${needToAdd.size}")
-    println(needToAdd.joinToString("\n"))
-    val input = generateCurrentUnsupportedOptionsList(argumentsCpp)
-    println(input)
-    val afterMerge = merge(input, needToAdd)
-    println(afterMerge)
+    val afterMerge = merge(input, needToAdd).joinToString("\n")
+    val newArgumentsCpp = argumentsCpp.replace(toReplace, afterMerge)
+    println(newArgumentsCpp)
 }
