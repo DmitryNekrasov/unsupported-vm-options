@@ -26,12 +26,6 @@ fun getNewOptions(old: Set<String>, new: Set<String>): List<String> {
     return ret
 }
 
-fun filterByGlobalsHpp(pathToHotspot: String, options: List<String>): List<String> {
-    val pathToGlobalsHpp = Path.of(pathToHotspot, "src", "share", "runtime", "globals.hpp").toString()
-    val globalsHpp = FileReader(File(pathToGlobalsHpp)).readText()
-    return options.filter { !globalsHpp.contains(it) }
-}
-
 fun main(args: Array<String>) {
     if (args.size < 2) {
         throw IllegalArgumentException("Not enough arguments for the application to work. You need to pass 2 paths to the JDK.")
@@ -42,7 +36,20 @@ fun main(args: Array<String>) {
     val pathToJdkOld = args[0]
     val pathToJdkNew = args[1]
     val pathToHotspot = args[2]
-    val needToAddOptions = filterByGlobalsHpp(pathToHotspot, getNewOptions(generate(pathToJdkOld), generate(pathToJdkNew)))
-    println("Options number: ${needToAddOptions.size}")
-    println(needToAddOptions.joinToString("\n"))
+
+    fun List<String>.filterByGlobalsHpp(): List<String> {
+        val pathToGlobalsHpp = Path.of(pathToHotspot, "src", "share", "runtime", "globals.hpp").toString()
+        val globalsHpp = FileReader(File(pathToGlobalsHpp)).readText()
+        return this.filter { !globalsHpp.contains(it) }
+    }
+
+    fun List<String>.filterByArgumentsCpp(): List<String> {
+        val pathToArgumentsCpp = Path.of(pathToHotspot, "src", "share", "runtime", "arguments.cpp").toString()
+        val argumentsCpp = FileReader(File(pathToArgumentsCpp)).readText()
+        return this.filter { !argumentsCpp.contains(it) }
+    }
+
+    val options = getNewOptions(generate(pathToJdkOld), generate(pathToJdkNew)).filterByGlobalsHpp().filterByArgumentsCpp()
+    println("Options number: ${options.size}")
+    println(options.joinToString("\n"))
 }
