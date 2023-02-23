@@ -2,7 +2,7 @@
 
 This application adds new options from the new version of the JDK to the list of unsupported options.
 
-To work, you need to run the application with three parameters:
+To work, you need to run the application (`unsupported-vm-options-1.0-jar-with-dependencies.jar`) with three parameters:
 * Path to build from old JDK version
 * Path to build from new JDK version
 * Path to the hotspot folder in the Zing project
