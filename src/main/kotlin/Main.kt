@@ -59,17 +59,7 @@ fun merge(input: List<String>, needToAdd: List<String>): List<String> {
     return result
 }
 
-fun main(args: Array<String>) {
-    if (args.size < 2) {
-        throw IllegalArgumentException("Not enough arguments for the application to work. You need to pass 2 paths to the JDK.")
-    }
-    if (args.size < 3) {
-        throw IllegalArgumentException("Not enough arguments for the application to work. You need to pass a path to the hotspot folder.")
-    }
-    val pathToJdkOld = args[0]
-    val pathToJdkNew = args[1]
-    val pathToHotspot = args[2]
-
+fun addUnsupportedVmOptions(pathToJdkOld: String, pathToJdkNew: String, pathToHotspot: String) {
     fun List<String>.filterByGlobalsHpp(): List<String> {
         val pathToGlobalsHpp = Path.of(pathToHotspot, "src", "share", "runtime", "globals.hpp").toString()
         val globalsHpp = FileReader(File(pathToGlobalsHpp)).readText()
@@ -90,4 +80,14 @@ fun main(args: Array<String>) {
     val newArgumentsCpp = argumentsCpp.replace(toReplace, afterMerge)
     File(pathToArgumentsCpp).outputStream().write(newArgumentsCpp.toByteArray())
     println("Options added successfully")
+}
+
+fun main(args: Array<String>) {
+    if (args.size < 2) {
+        throw IllegalArgumentException("Not enough arguments for the application to work. You need to pass 2 paths to the JDK.")
+    }
+    if (args.size < 3) {
+        throw IllegalArgumentException("Not enough arguments for the application to work. You need to pass a path to the hotspot folder.")
+    }
+    addUnsupportedVmOptions(args[0], args[1], args[2])
 }
